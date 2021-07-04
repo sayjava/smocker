@@ -21,6 +21,7 @@ RUN yarn build
 FROM alpine
 WORKDIR /opt
 EXPOSE 8080 8081
+COPY ssl /opt/ssl
 COPY --from=build-backend /go/src/github.com/Thiht/smocker/build/* /opt/
 COPY --from=build-frontend /wd/build/* /opt/
 CMD ["/opt/smocker"]

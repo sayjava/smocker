@@ -1,6 +1,8 @@
 package server
 
 import (
+	"crypto/tls"
+	"io/ioutil"
 	"net/http"
 	"strconv"
 
@@ -10,6 +12,30 @@ import (
 	"github.com/labstack/echo"
 	log "github.com/sirupsen/logrus"
 )
+
+func createTLSConfig () (*tls.Config, error) {
+	var certByte []byte
+	var keyByte []byte
+	var err error
+	var cert tls.Certificate
+
+	
+	if certByte, err = ioutil.ReadFile("ssl/cert.pem"); err != nil {
+		return nil, err
+	}
+	
+	if keyByte, err = ioutil.ReadFile("ssl/key.pem"); err != nil {
+		return nil, err
+	}
+
+	if cert, err = tls.X509KeyPair(certByte, keyByte); err != nil {
+		return nil, err
+	}
+
+	return  &tls.Config{
+		Certificates: []tls.Certificate{cert},
+	}, nil
+}
 
 func NewMockServer(cfg config.Config) (*http.Server, services.Mocks) {
 	mockServerEngine := echo.New()
@@ -28,5 +54,14 @@ func NewMockServer(cfg config.Config) (*http.Server, services.Mocks) {
 	mockServerEngine.Any("/*", handler.GenericHandler)
 
 	mockServerEngine.Server.Addr = ":" + strconv.Itoa(cfg.MockServerListenPort)
+
+	if cfg.TLSEnabled {
+		if tlsConfig, err := createTLSConfig(); err != nil {
+			log.Fatal(err)
+		} else {
+			mockServerEngine.Server.TLSConfig = tlsConfig
+		}
+	}
+
 	return mockServerEngine.Server, mockServices
 }

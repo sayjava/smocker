@@ -87,6 +87,15 @@ test-integration: $(VENOM) check-default-ports
 	$(VENOM) run tests/features/$(SUITE)
 	kill `cat $(PID_FILE)` 2> /dev/null || true
 
+.PHONY: test-https-integration
+test-https-integration: $(VENOM) check-default-ports
+	mkdir -p coverage
+	go test -race -coverpkg="./..." -c . -o $(APPNAME).test
+	SMOCKER_PERSISTENCE_DIRECTORY=./sessions SMOCKER_TLS_ENABLED=true ./$(APPNAME).test -test.coverprofile=coverage/test-integration-cover.out >/dev/null 2>&1 & echo $$! > $(PID_FILE)
+	sleep 5
+	$(VENOM) run tests/features/https/$(SUITE)
+	kill `cat $(PID_FILE)` 2> /dev/null || true
+
 .PHONY: start-integration
 start-integration: $(VENOM)
 	$(VENOM) run tests/features/$(SUITE)

@@ -1,0 +1,21 @@
+name: Use mocks to respond
+version: "2"
+testcases:
+  - name: Use HTTPs endpoint
+    steps:
+      - type: http
+        method: POST
+        url: http://localhost:8081/reset
+      - type: http
+        method: POST
+        url: http://localhost:8081/mocks
+        bodyFile: ../../data/basic_mock.yml
+        assertions:
+          - result.statuscode ShouldEqual 200
+          - result.bodyjson.message ShouldEqual "Mocks registered successfully"
+      - type: http
+        method: GET
+        url: https://localhost:8080/test
+        assertions:
+          - result.statuscode ShouldEqual 200
+          - result.bodyjson.message ShouldEqual test
