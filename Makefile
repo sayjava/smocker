@@ -36,6 +36,7 @@ REFLEX=$(GOPATH)/bin/reflex
 $(REFLEX):
 	go install github.com/cespare/reflex@latest
 
+GODEBUG=x509ignoreCN=0
 GOLANGCILINTVERSION:=1.32.0
 GOLANGCILINT=$(GOPATH)/bin/golangci-lint
 $(GOLANGCILINT):
